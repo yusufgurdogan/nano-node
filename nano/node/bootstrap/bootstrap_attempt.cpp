@@ -464,7 +464,7 @@ bool nano::bootstrap_attempt_legacy::confirm_frontiers (nano::unique_lock<std::m
 								auto rep_request (batched_confirm_req_bundle.find (rep.channel));
 								if (rep_request == batched_confirm_req_bundle.end ())
 								{
-									std::deque<std::pair<nano::block_hash, nano::root>> insert_root_hash = { std::make_pair (*ii, *ii) };
+									std::deque<std::pair<nano::block_hash, nano::root>> insert_root_hash = { std::make_pair (*ii, 0) };
 									batched_confirm_req_bundle.emplace (rep.channel, insert_root_hash);
 								}
 								else
