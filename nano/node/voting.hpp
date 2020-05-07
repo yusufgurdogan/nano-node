@@ -30,8 +30,7 @@ class vote_generator final
 {
 public:
 	vote_generator (nano::node_config & config_a, nano::block_store & store_a, nano::wallets & wallets_a, nano::vote_processor & vote_processor_a, nano::votes_cache & votes_cache_a, nano::network & network_a);
-	void add (nano::block_hash const &);
-	void add (std::vector<nano::block_hash> const &);
+	bool add (nano::root const &, nano::block_hash const &);
 	void stop ();
 
 private:

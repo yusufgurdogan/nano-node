@@ -65,9 +65,10 @@ private: // State management
 	void send_confirm_req (nano::confirmation_solicitor &);
 	void activate_dependencies ();
 	// Calculate votes for local representatives
-	void generate_votes (nano::block_hash const &);
+	void generate_votes (nano::root const &, nano::block_hash const &);
 	void remove_votes (nano::block_hash const &);
 	std::atomic<bool> prioritized_m = { false };
+	std::atomic<bool> need_vote = { false };
 
 public:
 	election (nano::node &, std::shared_ptr<nano::block>, std::function<void(std::shared_ptr<nano::block>)> const &, bool);

@@ -34,7 +34,7 @@ status ({ block_a, 0, std::chrono::duration_cast<std::chrono::milliseconds> (std
 	update_dependent ();
 	if (prioritized_a)
 	{
-		generate_votes (block_a->hash ());
+		generate_votes (block_a->root (), block_a->hash ());
 	}
 }
 
@@ -267,6 +267,10 @@ void nano::election::broadcast_block (nano::confirmation_solicitor & solicitor_a
 bool nano::election::transition_time (nano::confirmation_solicitor & solicitor_a)
 {
 	debug_assert (!node.active.mutex.try_lock ());
+	if (need_vote)
+	{
+		generate_votes (status.winner->root (), status.winner->hash ());
+	}
 	nano::unique_lock<std::mutex> lock (timepoints_mutex);
 	bool result = false;
 	switch (state_m)
@@ -376,7 +380,7 @@ void nano::election::confirm_if_quorum ()
 	if (sum >= node.config.online_weight_minimum.number () && winner_hash_l != status_winner_hash_l)
 	{
 		remove_votes (status_winner_hash_l);
-		generate_votes (winner_hash_l);
+		generate_votes (status.winner->root (), winner_hash_l);
 		node.block_processor.force (block_l);
 		status.winner = block_l;
 		update_dependent ();
@@ -613,14 +617,19 @@ void nano::election::prioritize_election ()
 	debug_assert (!node.active.mutex.try_lock ());
 	debug_assert (!prioritized_m);
 	prioritized_m = true;
-	generate_votes (status.winner->hash ());
+	generate_votes (status.winner->root (), status.winner->hash ());
 }
 
-void nano::election::generate_votes (nano::block_hash const & hash_a)
+void nano::election::generate_votes (nano::root const & root_a, nano::block_hash const & hash_a)
 {
+	need_vote = true;
 	if (node.config.enable_voting && node.wallets.rep_counts ().voting > 0)
 	{
-		node.active.generator.add (hash_a);
+		need_vote = node.active.generator.add (root_a, hash_a);
+	}
+	else if (!node.config.enable_voting)
+	{
+		need_vote = false;
 	}
 }
 

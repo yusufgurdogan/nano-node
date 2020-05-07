@@ -25,7 +25,7 @@ thread ([this]() { run (); })
 	condition.wait (lock, [& started = started] { return started; });
 }
 
-void nano::vote_generator::add (nano::block_hash const & hash_a)
+bool nano::vote_generator::add (nano::root const & root_a, nano::block_hash const & hash_a)
 {
 	nano::unique_lock<std::mutex> lock (mutex);
 	hashes.push_back (hash_a);
@@ -34,17 +34,7 @@ void nano::vote_generator::add (nano::block_hash const & hash_a)
 		lock.unlock ();
 		condition.notify_all ();
 	}
-}
-
-void nano::vote_generator::add (std::vector<nano::block_hash> const & hashes_a)
-{
-	nano::unique_lock<std::mutex> lock (mutex);
-	hashes.insert (hashes.end (), hashes_a.begin (), hashes_a.end ());
-	if (hashes.size () >= nano::network::confirm_ack_hashes_max)
-	{
-		lock.unlock ();
-		condition.notify_all ();
-	}
+	return false;
 }
 
 void nano::vote_generator::stop ()
