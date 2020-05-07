@@ -94,6 +94,8 @@ public:
 	bool add (nano::root const &);
 	void clean ();
 
+	std::chrono::seconds const round_time{ nano::network_params ().network.is_test_network () ? 1 : 45 };
+
 private:
 	// clang-format off
 	boost::multi_index_container<vote_reservation,
@@ -104,8 +106,6 @@ private:
 			mi::member<vote_reservation, std::chrono::steady_clock::time_point const, &vote_reservation::time>>>>
 	reservations;
 	// clang-format on
-
-	std::chrono::seconds round_time{ nano::network_params ().network.is_test_network () ? 1 : 45 };
 
 	nano::local_vote_history & history;
 
@@ -144,6 +144,8 @@ private:
 	std::thread thread;
 
 	friend std::unique_ptr<container_info_component> collect_container_info (vote_generator & generator, const std::string & name);
+
+	friend class vote_generator_spacing_Test;
 };
 
 std::unique_ptr<container_info_component> collect_container_info (vote_generator & generator, const std::string & name);

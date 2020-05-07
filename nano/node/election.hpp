@@ -110,5 +110,7 @@ public:
 	std::unordered_map<nano::block_hash, nano::uint128_t> last_tally;
 	std::unordered_set<nano::block_hash> dependent_blocks;
 	std::chrono::seconds late_blocks_delay{ 5 };
+
+	friend class vote_generator_spacing_Test;
 };
 }
