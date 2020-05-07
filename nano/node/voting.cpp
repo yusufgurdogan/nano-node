@@ -103,6 +103,7 @@ void nano::local_vote_history::clean ()
 
 size_t nano::local_vote_history::size () const
 {
+	nano::lock_guard<std::mutex> guard (mutex);
 	return history.size ();
 }
 
