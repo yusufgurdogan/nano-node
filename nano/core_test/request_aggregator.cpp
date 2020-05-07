@@ -111,8 +111,8 @@ TEST (request_aggregator, two)
 	ASSERT_TIMELY (3s, 1 == node.stats.count (nano::stat::type::requests, nano::stat::detail::requests_cached_votes));
 	ASSERT_TIMELY (3s, 2 == node.stats.count (nano::stat::type::message, nano::stat::detail::confirm_ack, nano::stat::dir::out));
 	// Make sure the cached vote is for both hashes
-	auto vote1 (node.votes_cache.find (send1->hash ()));
-	auto vote2 (node.votes_cache.find (send2->hash ()));
+	auto vote1 (node.history.votes (send1->root (), send1->hash ()));
+	auto vote2 (node.history.votes (send2->root (), send2->hash ()));
 	ASSERT_EQ (1, vote1.size ());
 	ASSERT_EQ (1, vote2.size ());
 	ASSERT_EQ (vote1.front (), vote2.front ());
@@ -264,25 +264,4 @@ TEST (request_aggregator, channel_max_queue)
 	node.aggregator.add (channel, request);
 	node.aggregator.add (channel, request);
 	ASSERT_TIMELY (3s, 1 == node.stats.count (nano::stat::type::aggregator, nano::stat::detail::aggregator_dropped));
-}
-
-TEST (request_aggregator, unique)
-{
-	nano::system system;
-	nano::node_config node_config (nano::get_available_port (), system.logging);
-	node_config.frontiers_confirmation = nano::frontiers_confirmation_mode::disabled;
-	auto & node (*system.add_node (node_config));
-	nano::genesis genesis;
-	system.wallet (0)->insert_adhoc (nano::test_genesis_key.prv);
-	auto send1 (std::make_shared<nano::state_block> (nano::test_genesis_key.pub, genesis.hash (), nano::test_genesis_key.pub, nano::genesis_amount - nano::Gxrb_ratio, nano::test_genesis_key.pub, nano::test_genesis_key.prv, nano::test_genesis_key.pub, *node.work_generate_blocking (genesis.hash ())));
-	ASSERT_EQ (nano::process_result::progress, node.ledger.process (node.store.tx_begin_write (), *send1).code);
-	std::vector<std::pair<nano::block_hash, nano::root>> request;
-	request.emplace_back (send1->hash (), send1->root ());
-	auto channel (node.network.udp_channels.create (node.network.endpoint ()));
-	node.aggregator.add (channel, request);
-	node.aggregator.add (channel, request);
-	node.aggregator.add (channel, request);
-	node.aggregator.add (channel, request);
-	ASSERT_TIMELY (3s, 1 == node.stats.count (nano::stat::type::requests, nano::stat::detail::requests_generated_hashes));
-	ASSERT_TIMELY (3s, 1 == node.stats.count (nano::stat::type::requests, nano::stat::detail::requests_generated_votes));
 }

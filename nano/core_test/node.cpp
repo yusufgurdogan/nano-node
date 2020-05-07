@@ -2702,9 +2702,9 @@ TEST (node, local_votes_cache)
 		system.poll (node.aggregator.max_delay);
 	}
 	wait_vote_sequence (3);
-	ASSERT_TRUE (node.votes_cache.find (send1->hash ()).empty ());
-	ASSERT_FALSE (node.votes_cache.find (send2->hash ()).empty ());
-	ASSERT_FALSE (node.votes_cache.find (send3->hash ()).empty ());
+	ASSERT_FALSE (node.history.votes (send1->root (), send1->hash ()).empty ());
+	ASSERT_FALSE (node.history.votes (send2->root (), send2->hash ()).empty ());
+	ASSERT_FALSE (node.history.votes (send3->root (), send3->hash ()).empty ());
 }
 
 TEST (node, local_votes_cache_batch)
@@ -2718,7 +2718,6 @@ TEST (node, local_votes_cache_batch)
 	system.wallet (0)->insert_adhoc (nano::test_genesis_key.prv);
 	auto send1 (std::make_shared<nano::state_block> (nano::test_genesis_key.pub, genesis.hash (), nano::test_genesis_key.pub, nano::genesis_amount - nano::Gxrb_ratio, nano::test_genesis_key.pub, nano::test_genesis_key.prv, nano::test_genesis_key.pub, *node.work_generate_blocking (genesis.hash ())));
 	auto send2 (std::make_shared<nano::state_block> (nano::test_genesis_key.pub, send1->hash (), nano::test_genesis_key.pub, nano::genesis_amount - 2 * nano::Gxrb_ratio, nano::test_genesis_key.pub, nano::test_genesis_key.prv, nano::test_genesis_key.pub, *node.work_generate_blocking (send1->hash ())));
-	std::vector<std::shared_ptr<nano::state_block>> blocks{ send1, send2 };
 	std::vector<std::pair<nano::block_hash, nano::root>> batch{ { send1->hash (), send1->root () }, { send2->hash (), send2->root () } };
 	{
 		auto transaction (node.store.tx_begin_write ());
@@ -2727,49 +2726,19 @@ TEST (node, local_votes_cache_batch)
 	}
 	nano::confirm_req message (batch);
 	auto channel (node.network.udp_channels.create (node.network.endpoint ()));
+
 	// Generates and sends one vote for both hashes which is then cached
 	node.network.process_message (message, channel);
-	system.deadline_set (3s);
-	while (node.stats.count (nano::stat::type::message, nano::stat::detail::confirm_ack, nano::stat::dir::out) < 1)
-	{
-		ASSERT_NO_ERROR (system.poll ());
-	}
-	ASSERT_EQ (1, node.stats.count (nano::stat::type::message, nano::stat::detail::confirm_ack, nano::stat::dir::out));
-	ASSERT_FALSE (node.votes_cache.find (send1->hash ()).empty ());
-	ASSERT_FALSE (node.votes_cache.find (send2->hash ()).empty ());
+	ASSERT_TIMELY (3s, node.stats.count (nano::stat::type::message, nano::stat::detail::confirm_ack, nano::stat::dir::out) == 1);
+	ASSERT_FALSE (node.history.votes (send1->root (), send1->hash ()).empty ());
+	ASSERT_FALSE (node.history.votes (send2->root (), send2->hash ()).empty ());
+
 	// Only one confirm_ack should be sent if all hashes are part of the same vote
 	node.network.process_message (message, channel);
-	system.deadline_set (3s);
-	while (node.stats.count (nano::stat::type::message, nano::stat::detail::confirm_ack, nano::stat::dir::out) < 2)
-	{
-		ASSERT_NO_ERROR (system.poll ());
-	}
-	ASSERT_EQ (2, node.stats.count (nano::stat::type::message, nano::stat::detail::confirm_ack, nano::stat::dir::out));
-	// Test when votes are different
-	node.votes_cache.remove (send1->hash ());
-	node.votes_cache.remove (send2->hash ());
-	node.network.process_message (nano::confirm_req (send1->hash (), send1->root ()), channel);
-	system.deadline_set (3s);
-	while (node.stats.count (nano::stat::type::message, nano::stat::detail::confirm_ack, nano::stat::dir::out) < 3)
-	{
-		ASSERT_NO_ERROR (system.poll ());
-	}
-	ASSERT_EQ (3, node.stats.count (nano::stat::type::message, nano::stat::detail::confirm_ack, nano::stat::dir::out));
-	node.network.process_message (nano::confirm_req (send2->hash (), send2->root ()), channel);
-	system.deadline_set (3s);
-	while (node.stats.count (nano::stat::type::message, nano::stat::detail::confirm_ack, nano::stat::dir::out) < 4)
-	{
-		ASSERT_NO_ERROR (system.poll ());
-	}
-	ASSERT_EQ (4, node.stats.count (nano::stat::type::message, nano::stat::detail::confirm_ack, nano::stat::dir::out));
-	// There are two different votes, so both should be sent in response
-	node.network.process_message (message, channel);
-	system.deadline_set (3s);
-	while (node.stats.count (nano::stat::type::message, nano::stat::detail::confirm_ack, nano::stat::dir::out) < 6)
-	{
-		ASSERT_NO_ERROR (system.poll ());
-	}
-	ASSERT_EQ (6, node.stats.count (nano::stat::type::message, nano::stat::detail::confirm_ack, nano::stat::dir::out));
+	ASSERT_TIMELY (3s, node.stats.count (nano::stat::type::message, nano::stat::detail::confirm_ack, nano::stat::dir::out) == 2);
+
+	// Verify the vote is the same
+	ASSERT_EQ (node.history.votes (send1->root (), send1->hash ()), node.history.votes (send2->root (), send2->hash ()));
 }
 
 TEST (node, local_votes_cache_generate_new_vote)
@@ -2791,11 +2760,11 @@ TEST (node, local_votes_cache_generate_new_vote)
 	auto channel (node.network.udp_channels.create (node.network.endpoint ()));
 	node.network.process_message (message1, channel);
 	system.deadline_set (3s);
-	while (node.votes_cache.find (send1->hash ()).empty ())
+	while (node.history.votes (send1->root (), send1->hash ()).empty ())
 	{
 		ASSERT_NO_ERROR (system.poll ());
 	}
-	auto votes1 (node.votes_cache.find (send1->hash ()));
+	auto votes1 (node.history.votes (send1->root (), send1->hash ()));
 	ASSERT_EQ (1, votes1.size ());
 	ASSERT_EQ (1, votes1[0]->blocks.size ());
 	ASSERT_EQ (send1->hash (), boost::get<nano::block_hash> (votes1[0]->blocks[0]));
@@ -2815,11 +2784,11 @@ TEST (node, local_votes_cache_generate_new_vote)
 	nano::confirm_req message2 (roots_hashes);
 	node.network.process_message (message2, channel);
 	system.deadline_set (3s);
-	while (node.votes_cache.find (send2->hash ()).empty ())
+	while (node.history.votes (send2->root (), send2->hash ()).empty ())
 	{
 		ASSERT_NO_ERROR (system.poll ());
 	}
-	auto votes2 (node.votes_cache.find (send2->hash ()));
+	auto votes2 (node.history.votes (send2->root (), send2->hash ()));
 	ASSERT_EQ (1, votes2.size ());
 	ASSERT_EQ (1, votes2[0]->blocks.size ());
 	{
@@ -2829,36 +2798,10 @@ TEST (node, local_votes_cache_generate_new_vote)
 		ASSERT_EQ (current_vote->sequence, 2);
 		ASSERT_EQ (current_vote, votes2[0]);
 	}
-	ASSERT_FALSE (node.votes_cache.find (send1->hash ()).empty ());
-	ASSERT_FALSE (node.votes_cache.find (send2->hash ()).empty ());
+	ASSERT_FALSE (node.history.votes (send1->root (), send1->hash ()).empty ());
+	ASSERT_FALSE (node.history.votes (send2->root (), send2->hash ()).empty ());
 	// First generated + again cached + new generated
 	ASSERT_EQ (3, node.stats.count (nano::stat::type::message, nano::stat::detail::confirm_ack, nano::stat::dir::out));
-}
-
-// Tests that the max cache size is inversely proportional to the number of voting accounts
-TEST (node, local_votes_cache_size)
-{
-	nano::system system;
-	nano::node_config node_config (nano::get_available_port (), system.logging);
-	node_config.frontiers_confirmation = nano::frontiers_confirmation_mode::disabled;
-	node_config.vote_minimum = 0; // wallet will pick up the second account as voting even if unopened
-	auto & node (*system.add_node (node_config));
-	ASSERT_EQ (node.network_params.voting.max_cache, 2); // effective cache size is 1 with 2 voting accounts
-	nano::keypair key;
-	auto & wallet (*system.wallet (0));
-	wallet.insert_adhoc (nano::test_genesis_key.prv);
-	wallet.insert_adhoc (nano::keypair ().prv);
-	ASSERT_EQ (2, node.wallets.rep_counts ().voting);
-	auto transaction (node.store.tx_begin_read ());
-	auto vote1 (node.store.vote_generate (transaction, nano::test_genesis_key.pub, nano::test_genesis_key.prv, { nano::genesis_hash }));
-	nano::block_hash hash (1);
-	auto vote2 (node.store.vote_generate (transaction, nano::test_genesis_key.pub, nano::test_genesis_key.prv, { hash }));
-	node.votes_cache.add (vote1);
-	node.votes_cache.add (vote2);
-	auto existing2 (node.votes_cache.find (hash));
-	ASSERT_EQ (1, existing2.size ());
-	ASSERT_EQ (vote2, existing2.front ());
-	ASSERT_EQ (0, node.votes_cache.find (nano::genesis_hash).size ());
 }
 
 TEST (node, vote_republish)

@@ -66,7 +66,6 @@ private: // State management
 	void activate_dependencies ();
 	// Calculate votes for local representatives
 	void generate_votes (nano::root const &, nano::block_hash const &);
-	void remove_votes (nano::block_hash const &);
 	std::atomic<bool> prioritized_m = { false };
 	std::atomic<bool> need_vote = { false };
 

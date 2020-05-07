@@ -145,6 +145,7 @@ public:
 	bool active (nano::block const &);
 	bool active (nano::qualified_root const &);
 	std::shared_ptr<nano::election> election (nano::qualified_root const &) const;
+	boost::optional<nano::block_hash> winner (nano::block_hash const &) const;
 	// Returns false if the election difficulty was updated
 	bool update_difficulty (nano::block const &);
 	// Returns false if the election was restarted
@@ -189,10 +190,11 @@ public:
 	size_t election_winner_details_size ();
 	void add_election_winner_details (nano::block_hash const &, std::shared_ptr<nano::election> const &);
 
+	nano::vote_generator generator;
+
 private:
 	std::mutex election_winner_details_mutex;
 	std::unordered_map<nano::block_hash, std::shared_ptr<nano::election>> election_winner_details;
-	nano::vote_generator generator;
 
 	// Call action with confirmed block, may be different than what we started with
 	// clang-format off
