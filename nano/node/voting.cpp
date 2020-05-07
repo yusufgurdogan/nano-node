@@ -25,6 +25,19 @@ bool nano::vote_reserver::add (nano::root const & root_a)
 	return !result;
 }
 
+bool nano::vote_reserver::validate_and_update (std::vector<nano::root> const & roots_a)
+{
+	clean ();
+	auto & reservations_by_root (reservations.get<tag_root> ());
+	auto now (std::chrono::steady_clock::now ());
+	auto update_time = [&now](auto & reservation_a) { reservation_a.time = now; };
+	auto result = std::any_of (roots_a.begin (), roots_a.end (), [&update_time, &reservations_by_root](auto const & root_a) {
+		auto existing (reservations_by_root.find (root_a));
+		return existing == reservations_by_root.end () || !reservations_by_root.modify (existing, update_time);
+	});
+	return result;
+}
+
 void nano::vote_reserver::clean ()
 {
 	auto & reservations_by_time (reservations.get<tag_time> ());
@@ -168,18 +181,15 @@ void nano::vote_generator::generate (std::vector<std::pair<nano::block_hash, nan
 				roots.push_back (root);
 				if (hashes.size () == nano::network::confirm_ack_hashes_max)
 				{
-					lock.unlock ();
-					vote (hashes, roots, action_a);
+					vote (lock, hashes, roots, action_a);
 					hashes.clear ();
 					roots.clear ();
-					lock.lock ();
 				}
 			}
 		}
 		if (!hashes.empty ())
 		{
-			lock.unlock ();
-			vote (hashes, roots, action_a);
+			vote (lock, hashes, roots, action_a);
 		}
 	}
 }
@@ -213,28 +223,38 @@ void nano::vote_generator::send (nano::unique_lock<std::mutex> & lock_a)
 		roots.push_back (front.first);
 		hashes_l.push_back (front.second);
 	}
-	lock_a.unlock ();
 	if (!hashes_l.empty ())
 	{
-		vote (hashes_l, roots, [this](auto vote_a) { this->broadcast_action (vote_a); });
+		vote (lock_a, hashes_l, roots, [this](auto vote_a) { this->broadcast_action (vote_a); });
 	}
-	lock_a.lock ();
 }
 
-void nano::vote_generator::vote (std::vector<nano::block_hash> const & hashes_a, std::vector<nano::root> const & roots_a, std::function<void(std::shared_ptr<nano::vote> const &)> const & action_a) const
+void nano::vote_generator::vote (nano::unique_lock<std::mutex> & lock_a, std::vector<nano::block_hash> const & hashes_a, std::vector<nano::root> const & roots_a, std::function<void(std::shared_ptr<nano::vote> const &)> const & action_a)
 {
 	debug_assert (hashes_a.size () == roots_a.size ());
-	auto transaction (store.tx_begin_read ());
-	wallets.foreach_representative ([this, &hashes_a, &roots_a, &transaction, &action_a](nano::public_key const & pub_a, nano::raw_key const & prv_a) {
-		auto vote_l (this->store.vote_generate (transaction, pub_a, prv_a, hashes_a));
+	{
+		lock_a.unlock ();
+		auto transaction (store.tx_begin_read ());
+		std::vector<std::shared_ptr<nano::vote>> votes_l;
+		wallets.foreach_representative ([this, &hashes_a, &roots_a, &transaction, &votes_l](nano::public_key const & pub_a, nano::raw_key const & prv_a) {
+			votes_l.emplace_back (this->store.vote_generate (transaction, pub_a, prv_a, hashes_a));
+		});
+		lock_a.lock ();
+		// To be strictly correct, validation must go after vote generation. If validation fails, the votes are not used
+		if (!reserver.validate_and_update (roots_a))
 		{
-			for (size_t i (0), n (hashes_a.size ()); i != n; ++i)
+			lock_a.unlock ();
+			for (auto const & vote_l : votes_l)
 			{
-				this->history.add (roots_a[i], hashes_a[i], vote_l);
+				for (size_t i (0), n (hashes_a.size ()); i != n; ++i)
+				{
+					this->history.add (roots_a[i], hashes_a[i], vote_l);
+				}
+				action_a (vote_l);
 			}
+			lock_a.lock ();
 		}
-		action_a (vote_l);
-	});
+	}
 }
 
 void nano::vote_generator::broadcast_action (std::shared_ptr<nano::vote> const & vote_a) const

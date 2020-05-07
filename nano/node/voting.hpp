@@ -87,12 +87,15 @@ class vote_reserver final
 		{
 		}
 		nano::root root;
-		std::chrono::steady_clock::time_point const time;
+		std::chrono::steady_clock::time_point time;
 	};
 
 public:
 	vote_reserver (nano::local_vote_history &);
+	/** Returns false if the reservation was made */
 	bool add (nano::root const &);
+	/** Returns false if the reservations for these roots are still valid, and updates them with the current time. This should be called before vote generation */
+	bool validate_and_update (std::vector<nano::root> const &);
 	void clean ();
 
 	std::chrono::seconds const round_time{ nano::network_params ().network.is_test_network () ? 1 : 45 };
@@ -104,7 +107,7 @@ private:
 		mi::hashed_unique<mi::tag<class tag_root>,
 			mi::member<vote_reservation, nano::root, &vote_reservation::root>>,
 		mi::ordered_non_unique<mi::tag<class tag_time>,
-			mi::member<vote_reservation, std::chrono::steady_clock::time_point const, &vote_reservation::time>>>>
+			mi::member<vote_reservation, std::chrono::steady_clock::time_point, &vote_reservation::time>>>>
 	reservations;
 	// clang-format on
 
@@ -129,7 +132,7 @@ private:
 private:
 	void run ();
 	void send (nano::unique_lock<std::mutex> &);
-	void vote (std::vector<nano::block_hash> const &, std::vector<nano::root> const &, std::function<void(std::shared_ptr<nano::vote> const &)> const &) const;
+	void vote (nano::unique_lock<std::mutex> &, std::vector<nano::block_hash> const &, std::vector<nano::root> const &, std::function<void(std::shared_ptr<nano::vote> const &)> const &);
 	void broadcast_action (std::shared_ptr<nano::vote> const &) const;
 	mutable std::mutex mutex;
 	nano::condition_variable condition;

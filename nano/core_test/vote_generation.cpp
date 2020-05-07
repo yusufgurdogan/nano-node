@@ -60,18 +60,24 @@ TEST (vote_reserver, basic)
 	ASSERT_TRUE (history.exists (1));
 	ASSERT_FALSE (reserver.add (2));
 	ASSERT_TRUE (reserver.add (1));
+	auto sleep_time = 100ms;
+	ASSERT_GT (reserver.round_time, 5 * sleep_time);
+	auto max_iterations (2 * reserver.round_time / 100ms);
 	auto iterations (0);
 	while (reserver.add (1))
 	{
 		ASSERT_TRUE (history.exists (1));
-		std::this_thread::sleep_for (100ms);
-		ASSERT_LT (++iterations, 20);
+		std::this_thread::sleep_for (sleep_time);
+		ASSERT_LT (++iterations, max_iterations);
 	}
 	ASSERT_FALSE (history.exists (1));
 	ASSERT_GT (iterations, 0);
 	ASSERT_TRUE (reserver.add (1));
 	ASSERT_FALSE (reserver.add (2));
 	ASSERT_TRUE (reserver.add (1));
+	ASSERT_FALSE (reserver.validate_and_update ({ 2 }));
+	std::this_thread::sleep_for (reserver.round_time);
+	ASSERT_TRUE (reserver.validate_and_update ({ 2 }));
 }
 
 TEST (vote_generator, cache)
