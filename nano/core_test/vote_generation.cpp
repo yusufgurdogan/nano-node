@@ -96,6 +96,41 @@ TEST (vote_generator, duplicate)
 	ASSERT_TRUE (node.active.generator.add (1, 3));
 }
 
+TEST (vote_generator, multiple_representatives)
+{
+	nano::system system (1);
+	auto & node (*system.nodes[0]);
+	nano::keypair key1, key2, key3;
+	auto & wallet (*system.wallet (0));
+	wallet.insert_adhoc (nano::test_genesis_key.prv);
+	wallet.insert_adhoc (key1.prv);
+	wallet.insert_adhoc (key2.prv);
+	wallet.insert_adhoc (key3.prv);
+	auto const amount = 100 * nano::Gxrb_ratio;
+	wallet.send_sync (nano::test_genesis_key.pub, key1.pub, amount);
+	wallet.send_sync (nano::test_genesis_key.pub, key2.pub, amount);
+	wallet.send_sync (nano::test_genesis_key.pub, key3.pub, amount);
+	ASSERT_TIMELY (3s, node.balance (key1.pub) == amount && node.balance (key2.pub) == amount && node.balance (key3.pub) == amount);
+	wallet.change_sync (key1.pub, key1.pub);
+	wallet.change_sync (key2.pub, key2.pub);
+	wallet.change_sync (key3.pub, key3.pub);
+	ASSERT_TRUE (node.weight (key1.pub) == amount && node.weight (key2.pub) == amount && node.weight (key3.pub) == amount);
+	node.wallets.compute_reps ();
+	ASSERT_EQ (4, node.wallets.rep_counts ().voting);
+	auto hash = wallet.send_sync (nano::test_genesis_key.pub, nano::test_genesis_key.pub, 1);
+	auto send = node.block (hash);
+	ASSERT_NE (nullptr, send);
+	ASSERT_TIMELY (5s, node.history.votes (send->root (), send->hash ()).size () == 4);
+	auto votes (node.history.votes (send->root (), send->hash ()));
+	for (auto const & account : { key1.pub, key2.pub, key3.pub, nano::test_genesis_key.pub })
+	{
+		auto existing (std::find_if (votes.begin (), votes.end (), [&account](std::shared_ptr<nano::vote> const & vote_a) -> bool {
+			return vote_a->account == account;
+		}));
+		ASSERT_NE (votes.end (), existing);
+	}
+}
+
 namespace nano
 {
 TEST (vote_generator, race)
