@@ -113,23 +113,6 @@ void nano::vote_generator::run ()
 	}
 }
 
-nano::vote_generator_session::vote_generator_session (nano::vote_generator & vote_generator_a) :
-generator (vote_generator_a)
-{
-}
-
-void nano::vote_generator_session::add (nano::block_hash const & hash_a)
-{
-	debug_assert (nano::thread_role::get () == nano::thread_role::name::request_loop);
-	hashes.push_back (hash_a);
-}
-
-void nano::vote_generator_session::flush ()
-{
-	debug_assert (nano::thread_role::get () == nano::thread_role::name::request_loop);
-	generator.add (hashes);
-}
-
 nano::votes_cache::votes_cache (nano::wallets & wallets_a) :
 wallets (wallets_a)
 {

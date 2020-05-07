@@ -54,18 +54,6 @@ private:
 	friend std::unique_ptr<container_info_component> collect_container_info (vote_generator & vote_generator, const std::string & name);
 };
 
-class vote_generator_session final
-{
-public:
-	vote_generator_session (vote_generator & vote_generator_a);
-	void add (nano::block_hash const &);
-	void flush ();
-
-private:
-	nano::vote_generator & generator;
-	std::vector<nano::block_hash> hashes;
-};
-
 std::unique_ptr<container_info_component> collect_container_info (vote_generator & vote_generator, const std::string & name);
 class cached_votes final
 {
