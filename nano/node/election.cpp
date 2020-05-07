@@ -621,13 +621,9 @@ void nano::election::prioritize_election ()
 
 void nano::election::generate_votes (nano::root const & root_a, nano::block_hash const & hash_a)
 {
-	need_vote = true;
-	if (node.config.enable_voting && node.wallets.rep_counts ().voting > 0)
+	need_vote = node.config.enable_voting && node.wallets.rep_counts ().voting > 0;
+	if (need_vote)
 	{
 		need_vote = node.active.generator.add (root_a, hash_a);
-	}
-	else if (!node.config.enable_voting)
-	{
-		need_vote = false;
 	}
 }
