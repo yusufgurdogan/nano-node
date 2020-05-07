@@ -70,6 +70,7 @@ private:
 	friend std::unique_ptr<container_info_component> collect_container_info (local_vote_history & history, const std::string & name);
 
 	friend class local_vote_history_basic_Test;
+	friend class vote_generator_race_Test;
 };
 
 std::unique_ptr<container_info_component> collect_container_info (local_vote_history & history, const std::string & name);

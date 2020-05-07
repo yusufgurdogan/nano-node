@@ -98,6 +98,37 @@ TEST (vote_generator, duplicate)
 
 namespace nano
 {
+TEST (vote_generator, race)
+{
+	nano::system system (1);
+	auto & node (*system.nodes[0]);
+	system.wallet (0)->insert_adhoc (nano::test_genesis_key.prv);
+
+	std::vector<boost::thread> threads;
+	std::atomic<bool> done{ false };
+	for (auto i = 0; i < 4; ++i)
+	{
+		threads.emplace_back ([i, &generator = node.active.generator, &done]() {
+			auto j = 1000000 * i;
+			while (!done)
+			{
+				generator.add (0, j++);
+			}
+		});
+	}
+	auto deadline = std::chrono::steady_clock::now () + 3s;
+	while (std::chrono::steady_clock::now () < deadline)
+	{
+		ASSERT_LE (node.history.size (), 1);
+		ASSERT_LE (node.history.votes (0).size (), 1);
+	}
+	done = true;
+	for (auto & thread : threads)
+	{
+		thread.join ();
+	}
+}
+
 TEST (vote_generator, spacing)
 {
 	auto const N = nano::Gxrb_ratio;
