@@ -122,7 +122,7 @@ TEST (vote_generator, multiple_representatives)
 	wallet.change_sync (key3.pub, key3.pub);
 	ASSERT_TRUE (node.weight (key1.pub) == amount && node.weight (key2.pub) == amount && node.weight (key3.pub) == amount);
 	node.wallets.compute_reps ();
-	ASSERT_EQ (4, node.wallets.rep_counts ().voting);
+	ASSERT_EQ (4, node.wallets.reps ().voting);
 	auto hash = wallet.send_sync (nano::test_genesis_key.pub, nano::test_genesis_key.pub, 1);
 	auto send = node.block (hash);
 	ASSERT_NE (nullptr, send);
@@ -273,7 +273,7 @@ TEST (vote_generator, spacing)
 	// Insert key1 into wallet
 	system.wallet (0)->insert_adhoc (key1.prv);
 	node.wallets.compute_reps ();
-	ASSERT_EQ (1, node.wallets.rep_counts ().voting);
+	ASSERT_EQ (1, node.wallets.reps ().voting);
 
 	// Generate a vote for send3
 	ASSERT_FALSE (election->need_vote);
