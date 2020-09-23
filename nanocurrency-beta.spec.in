@@ -1,18 +1,18 @@
-Name:                   nanocurrency-beta
+Name:                   bademcurrency-beta
 Version:                @VERSION@ 
 Release:                @RELEASE@%{?dist}
-Summary:                Nanocurrency Beta Daemon
+Summary:                Bademcurrency Beta Daemon
 License:                BSD-2-Clause
-URL:                    https://nano.org/
+URL:                    https://badem.io/
 Requires(pre):          /usr/sbin/useradd, /usr/bin/getent
 Requires(postun):       /usr/sbin/userdel
 BuildRequires:          make, libstdc++-static, glibc-devel, glibc-headers
-Source:                 nano-%{version}.tar.gz
+Source:                 badem-%{version}.tar.gz
 
 %description
-This is nanocurrency daemon.  Nano is a digital currency that is
+This is bademcurrency daemon.  Badem is a digital currency that is
 peer-to-peer, decentralized, and trustless. This package includes
-the nano daemon, and a service.
+the badem daemon, and a service.
 
 %prep
 if [ ! -x "$(which cmake)" ]; then
@@ -29,36 +29,36 @@ if test ! -d /usr/local/boost; then
 	echo "Boost should be in /usr/local/boost" >&2
 	exit 1
 fi
-%autosetup -n nano-%{version}
+%autosetup -n badem-%{version}
 
 %build
-cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DBOOST_ROOT=/usr/local/boost -DACTIVE_NETWORK=nano_beta_network .
-make nano_node %{?_smp_mflags}
+cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DBOOST_ROOT=/usr/local/boost -DACTIVE_NETWORK=badem_beta_network .
+make badem_node %{?_smp_mflags}
 
 %install
 if [ ! %{buildroot} = "/" ]; then %{__rm} -rf %{buildroot}; fi
 mkdir -p %{buildroot}/usr/bin
 mkdir -p %{buildroot}/etc/systemd/system/
-cp nano_node %{buildroot}/usr/bin/nano_node-beta
-cp nano_rpc %{buildroot}/usr/bin/nano_rpc-beta
-cp etc/systemd/nanocurrency-beta.service %{buildroot}/etc/systemd/system/nanocurrency-beta.service
+cp badem_node %{buildroot}/usr/bin/badem_node-beta
+cp badem_rpc %{buildroot}/usr/bin/badem_rpc-beta
+cp etc/systemd/bademcurrency-beta.service %{buildroot}/etc/systemd/system/bademcurrency-beta.service
 
 %clean
 if [ ! %{buildroot} = "/" ]; then %{__rm} -rf %{buildroot}; fi
 
 %files
 %defattr(755,root,root)
-%{_bindir}/nano_node-beta
-%attr(644,root,root) /etc/systemd/system/nanocurrency-beta.service
+%{_bindir}/badem_node-beta
+%attr(644,root,root) /etc/systemd/system/bademcurrency-beta.service
 
 %pre
 PATH="/usr/bin:/usr/sbin:/bin:/sbin:${PATH}"; export PATH
-mkdir -p /var/nanocurrency/Nano
-getent group nanocurrency >/dev/null || groupadd --system nanocurrency || exit 1
-getent passwd nanocurrency >/dev/null || useradd --system --create-home --home-dir /var/nanocurrency --shell /bin/bash --comment "Nanocurrency Daemon user" --gid nanocurrency nanocurrency || exit 1
-chown -R nanocurrency:nanocurrency /var/nanocurrency
-chmod 700 /var/nanocurrency
+mkdir -p /var/bademcurrency/Badem
+getent group bademcurrency >/dev/null || groupadd --system bademcurrency || exit 1
+getent passwd bademcurrency >/dev/null || useradd --system --create-home --home-dir /var/bademcurrency --shell /bin/bash --comment "Bademcurrency Daemon user" --gid bademcurrency bademcurrency || exit 1
+chown -R bademcurrency:bademcurrency /var/bademcurrency
+chmod 700 /var/bademcurrency
 
 %postun
 PATH="/usr/bin:/usr/sbin:/bin:/sbin:${PATH}"; export PATH
-userdel nanocurrency >/dev/null 2>/dev/null || :
+userdel bademcurrency >/dev/null 2>/dev/null || :

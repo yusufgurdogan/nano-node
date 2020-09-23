@@ -973,7 +973,7 @@ std::string nano_qt::status::color ()
 }
 
 nano_qt::wallet::wallet (QApplication & application_a, nano_qt::eventloop_processor & processor_a, nano::node & node_a, std::shared_ptr<nano::wallet> wallet_a, nano::account & account_a) :
-rendering_ratio (nano::Mxrb_ratio),
+rendering_ratio (nano::mbdm_ratio),
 node (node_a),
 wallet_m (wallet_a),
 account (account_a),
@@ -1433,10 +1433,10 @@ void nano_qt::wallet::change_rendering_ratio (nano::uint128_t const & rendering_
 std::string nano_qt::wallet::format_balance (nano::uint128_t const & balance) const
 {
 	auto balance_str = nano::amount (balance).format_balance (rendering_ratio, 3, false);
-	auto unit = std::string ("NANO");
-	if (rendering_ratio == nano::kxrb_ratio)
+	auto unit = std::string ("BADEM");
+	if (rendering_ratio == nano::kbdm_ratio)
 	{
-		unit = std::string ("knano");
+		unit = std::string ("kbadem");
 	}
 	else if (rendering_ratio == nano::xrb_ratio)
 	{
@@ -1726,8 +1726,8 @@ scale_window (new QWidget),
 scale_layout (new QHBoxLayout),
 scale_label (new QLabel ("Scale:")),
 ratio_group (new QButtonGroup),
-mnano_unit (new QRadioButton ("Mnano")),
-knano_unit (new QRadioButton ("knano")),
+mbadem_unit (new QRadioButton ("mbadem")),
+kbadem_unit (new QRadioButton ("kbadem")),
 nano_unit (new QRadioButton ("nano")),
 raw_unit (new QRadioButton ("raw")),
 back (new QPushButton ("Back")),
@@ -1742,7 +1742,7 @@ peers_layout (new QVBoxLayout),
 peers_model (new QStandardItemModel),
 peers_view (new QTableView),
 peer_summary_layout (new QHBoxLayout),
-bootstrap_label (new QLabel ("IPV6:port \"::ffff:192.168.0.1:7075\"")),
+bootstrap_label (new QLabel ("IPV6:port \"::ffff:192.168.0.1:2224\"")),
 peer_count_label (new QLabel ("")),
 bootstrap_line (new QLineEdit),
 peers_bootstrap (new QPushButton ("Initiate Bootstrap")),
@@ -1750,17 +1750,17 @@ peers_refresh (new QPushButton ("Refresh")),
 peers_back (new QPushButton ("Back")),
 wallet (wallet_a)
 {
-	ratio_group->addButton (mnano_unit);
-	ratio_group->addButton (knano_unit);
+	ratio_group->addButton (mbadem_unit);
+	ratio_group->addButton (kbadem_unit);
 	ratio_group->addButton (nano_unit);
 	ratio_group->addButton (raw_unit);
-	ratio_group->setId (mnano_unit, 0);
-	ratio_group->setId (knano_unit, 1);
+	ratio_group->setId (mbadem_unit, 0);
+	ratio_group->setId (kbadem_unit, 1);
 	ratio_group->setId (nano_unit, 2);
 	ratio_group->setId (raw_unit, 3);
 	scale_layout->addWidget (scale_label);
-	scale_layout->addWidget (mnano_unit);
-	scale_layout->addWidget (knano_unit);
+	scale_layout->addWidget (mbadem_unit);
+	scale_layout->addWidget (kbadem_unit);
 	scale_layout->addWidget (nano_unit);
 	scale_layout->addWidget (raw_unit);
 	scale_window->setLayout (scale_layout);
@@ -1814,18 +1814,18 @@ wallet (wallet_a)
 	layout->addWidget (back);
 	window->setLayout (layout);
 
-	QObject::connect (mnano_unit, &QRadioButton::toggled, [this]() {
-		if (mnano_unit->isChecked ())
+	QObject::connect (mbadem_unit, &QRadioButton::toggled, [this]() {
+		if (mbadem_unit->isChecked ())
 		{
-			QSettings ().setValue (saved_ratio_key, ratio_group->id (mnano_unit));
-			this->wallet.change_rendering_ratio (nano::Mxrb_ratio);
+			QSettings ().setValue (saved_ratio_key, ratio_group->id (mbadem_unit));
+			this->wallet.change_rendering_ratio (nano::mbdm_ratio);
 		}
 	});
-	QObject::connect (knano_unit, &QRadioButton::toggled, [this]() {
-		if (knano_unit->isChecked ())
+	QObject::connect (kbadem_unit, &QRadioButton::toggled, [this]() {
+		if (kbadem_unit->isChecked ())
 		{
-			QSettings ().setValue (saved_ratio_key, ratio_group->id (knano_unit));
-			this->wallet.change_rendering_ratio (nano::kxrb_ratio);
+			QSettings ().setValue (saved_ratio_key, ratio_group->id (kbadem_unit));
+			this->wallet.change_rendering_ratio (nano::kbdm_ratio);
 		}
 	});
 	QObject::connect (nano_unit, &QRadioButton::toggled, [this]() {
@@ -1842,7 +1842,7 @@ wallet (wallet_a)
 			this->wallet.change_rendering_ratio (nano::raw_ratio);
 		}
 	});
-	auto selected_ratio_id (QSettings ().value (saved_ratio_key, ratio_group->id (mnano_unit)).toInt ());
+	auto selected_ratio_id (QSettings ().value (saved_ratio_key, ratio_group->id (mbadem_unit)).toInt ());
 	auto selected_ratio_button = ratio_group->button (selected_ratio_id);
 	assert (selected_ratio_button != nullptr);
 
@@ -1852,7 +1852,7 @@ wallet (wallet_a)
 	}
 	else
 	{
-		mnano_unit->click ();
+		mbadem_unit->click ();
 	}
 	QObject::connect (wallet_refresh, &QPushButton::released, [this]() {
 		this->wallet.accounts.refresh ();

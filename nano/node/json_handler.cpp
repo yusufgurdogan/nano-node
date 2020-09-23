@@ -83,29 +83,29 @@ void nano::json_handler::process_request (bool unsafe_a)
 				request.put ("head", request.get<std::string> ("hash"));
 				account_history ();
 			}
-			else if (action == "knano_from_raw" || action == "krai_from_raw")
+			else if (action == "kbadem_from_raw" || action == "krai_from_raw")
 			{
-				mnano_from_raw (nano::kxrb_ratio);
+				mbadem_from_raw (nano::kbdm_ratio);
 			}
-			else if (action == "knano_to_raw" || action == "krai_to_raw")
+			else if (action == "kbadem_to_raw" || action == "krai_to_raw")
 			{
-				mnano_to_raw (nano::kxrb_ratio);
+				mbadem_to_raw (nano::kbdm_ratio);
 			}
 			else if (action == "nano_from_raw" || action == "rai_from_raw")
 			{
-				mnano_from_raw (nano::xrb_ratio);
+				mbadem_from_raw (nano::xrb_ratio);
 			}
 			else if (action == "nano_to_raw" || action == "rai_to_raw")
 			{
-				mnano_to_raw (nano::xrb_ratio);
+				mbadem_to_raw (nano::xrb_ratio);
 			}
-			else if (action == "mnano_from_raw" || action == "mrai_from_raw")
+			else if (action == "mbadem_from_raw" || action == "mrai_from_raw")
 			{
-				mnano_from_raw ();
+				mbadem_from_raw ();
 			}
-			else if (action == "mnano_to_raw" || action == "mrai_to_raw")
+			else if (action == "mbadem_to_raw" || action == "mrai_to_raw")
 			{
-				mnano_to_raw ();
+				mbadem_to_raw ();
 			}
 			else if (action == "password_valid")
 			{
@@ -2761,7 +2761,7 @@ void nano::json_handler::ledger ()
 	response_errors ();
 }
 
-void nano::json_handler::mnano_from_raw (nano::uint128_t ratio)
+void nano::json_handler::mbadem_from_raw (nano::uint128_t ratio)
 {
 	auto amount (amount_impl ());
 	if (!ec)
@@ -2772,7 +2772,7 @@ void nano::json_handler::mnano_from_raw (nano::uint128_t ratio)
 	response_errors ();
 }
 
-void nano::json_handler::mnano_to_raw (nano::uint128_t ratio)
+void nano::json_handler::mbadem_to_raw (nano::uint128_t ratio)
 {
 	auto amount (amount_impl ());
 	if (!ec)
@@ -4099,7 +4099,7 @@ void nano::json_handler::version ()
 	response_l.put ("rpc_version", "1");
 	response_l.put ("store_version", std::to_string (node.store_version ()));
 	response_l.put ("protocol_version", std::to_string (node.network_params.protocol.protocol_version));
-	response_l.put ("node_vendor", boost::str (boost::format ("Nano %1%") % NANO_VERSION_STRING));
+	response_l.put ("node_vendor", boost::str (boost::format ("Badem %1%") % NANO_VERSION_STRING));
 	response_l.put ("network", node.network_params.network.get_current_network_as_string ());
 	response_l.put ("network_identifier", nano::genesis ().hash ().to_string ());
 	response_l.put ("build_info", BUILD_INFO);

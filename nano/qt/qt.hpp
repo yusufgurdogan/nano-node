@@ -66,8 +66,8 @@ public:
 	QHBoxLayout * scale_layout;
 	QLabel * scale_label;
 	QButtonGroup * ratio_group;
-	QRadioButton * mnano_unit;
-	QRadioButton * knano_unit;
+	QRadioButton * mbadem_unit;
+	QRadioButton * kbadem_unit;
 	QRadioButton * nano_unit;
 	QRadioButton * raw_unit;
 	QPushButton * back;

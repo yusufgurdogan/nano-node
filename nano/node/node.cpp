@@ -445,7 +445,7 @@ startup_time (std::chrono::steady_clock::now ())
 						{
 							break;
 						}
-						logger.always_log ("Using bootstrap rep weight: ", account.to_account (), " -> ", weight.format_balance (Mxrb_ratio, 0, true), " XRB");
+						logger.always_log ("Using bootstrap rep weight: ", account.to_account (), " -> ", weight.format_balance (mbdm_ratio, 0, true), " XRB");
 						ledger.bootstrap_weights[account] = weight.number ();
 					}
 				}
@@ -955,13 +955,13 @@ void nano::node::ongoing_unchecked_cleanup ()
 
 int nano::node::price (nano::uint128_t const & balance_a, int amount_a)
 {
-	assert (balance_a >= amount_a * nano::Gxrb_ratio);
+	assert (balance_a >= amount_a * nano::Gbdm_ratio);
 	auto balance_l (balance_a);
 	double result (0.0);
 	for (auto i (0); i < amount_a; ++i)
 	{
-		balance_l -= nano::Gxrb_ratio;
-		auto balance_scaled ((balance_l / nano::Mxrb_ratio).convert_to<double> ());
+		balance_l -= nano::Gbdm_ratio;
+		auto balance_scaled ((balance_l / nano::mbdm_ratio).convert_to<double> ());
 		auto units (balance_scaled / 1000.0);
 		auto unit_price (((free_cutoff - units) / free_cutoff) * price_max);
 		result += std::min (std::max (0.0, unit_price), price_max);

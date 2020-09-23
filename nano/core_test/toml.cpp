@@ -303,7 +303,7 @@ TEST (toml, base_override)
 {
 	std::stringstream ss_base;
 	ss_base << R"toml(
-	        node.peering_port=7075
+	        node.peering_port=2224
 	)toml";
 
 	std::stringstream ss_override;
@@ -347,11 +347,11 @@ TEST (toml, put)
 	nano::tomlconfig config_node;
 	// Overwrite value and add to child node
 	config_node.put ("port", "7074");
-	config_node.put ("port", "7075");
+	config_node.put ("port", "2225");
 	config.put_child ("node", config_node);
 	uint16_t port;
 	config.get_required<uint16_t> ("node.port", port);
-	ASSERT_EQ (port, 7075);
+	ASSERT_EQ (port, 2225);
 	ASSERT_FALSE (config.get_error ());
 }
 
@@ -398,7 +398,7 @@ TEST (toml, daemon_config_deserialize_no_defaults)
 	peering_port = 999
 	pow_sleep_interval= 999
 	preconfigured_peers = ["test.org"]
-	preconfigured_representatives = ["nano_3arg3asgtigae3xckabaaewkx3bzsh7nwz7jkmjos79ihyaxwphhm6qgjps4"]
+	preconfigured_representatives = ["bdm_3arg3asgtigae3xckabaaewkx3bzsh7nwz7jkmjos79ihyaxwphhm6qgjps4"]
 	receive_minimum = "999"
 	signature_checker_threads = 999
 	tcp_incoming_connections_max = 999
@@ -508,7 +508,7 @@ TEST (toml, daemon_config_deserialize_no_defaults)
 
 	[rpc.child_process]
 	enable = true
-	rpc_path = "/test/nano_rpc"
+	rpc_path = "/test/badem_rpc"
 	)toml";
 
 	nano::tomlconfig toml;

@@ -1,12 +1,12 @@
 [Unit]
-Description=Nano Daemon beta network
+Description=Badem Daemon beta network
 After=network.target
 
 [Service]
 Type=simple
-User=nanocurrency
-WorkingDirectory=/var/nanocurrency/NanoBeta
-ExecStart=/usr/bin/nano_node-beta --daemon
+User=bademcurrency
+WorkingDirectory=/var/bademcurrency/BademBeta
+ExecStart=/usr/bin/badem_node-beta --daemon
 Restart=on-failure
 
 [Install]

@@ -961,8 +961,8 @@ TEST (wallet, send_race)
 	nano::keypair key2;
 	for (auto i (1); i < 60; ++i)
 	{
-		ASSERT_NE (nullptr, system.wallet (0)->send_action (nano::test_genesis_key.pub, key2.pub, nano::Gxrb_ratio));
-		ASSERT_EQ (nano::genesis_amount - nano::Gxrb_ratio * i, system.nodes[0]->balance (nano::test_genesis_key.pub));
+		ASSERT_NE (nullptr, system.wallet (0)->send_action (nano::test_genesis_key.pub, key2.pub, nano::Gbdm_ratio));
+		ASSERT_EQ (nano::genesis_amount - nano::Gbdm_ratio * i, system.nodes[0]->balance (nano::test_genesis_key.pub));
 	}
 }
 
@@ -1185,7 +1185,7 @@ TEST (wallet, work_watcher_generation_disabled)
 	nano::work_pool pool (std::numeric_limits<unsigned>::max ());
 	nano::genesis genesis;
 	nano::keypair key;
-	auto block (std::make_shared<nano::state_block> (nano::test_genesis_key.pub, genesis.hash (), nano::test_genesis_key.pub, nano::genesis_amount - nano::Mxrb_ratio, key.pub, nano::test_genesis_key.prv, nano::test_genesis_key.pub, *pool.generate (genesis.hash ())));
+	auto block (std::make_shared<nano::state_block> (nano::test_genesis_key.pub, genesis.hash (), nano::test_genesis_key.pub, nano::genesis_amount - nano::mbdm_ratio, key.pub, nano::test_genesis_key.prv, nano::test_genesis_key.pub, *pool.generate (genesis.hash ())));
 	uint64_t difficulty (0);
 	ASSERT_FALSE (nano::work_validate (*block, &difficulty));
 	node.wallets.watcher->add (block);
