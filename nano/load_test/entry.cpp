@@ -400,7 +400,7 @@ int main (int argc, char * const * argv)
 	}
 	else
 	{
-		auto node_filepath = running_executable_filepath.parent_path () / "badem_node";
+		auto node_filepath = running_executable_filepath.parent_path () / "nano_node";
 		if (running_executable_filepath.has_extension ())
 		{
 			node_filepath.replace_extension (running_executable_filepath.extension ());
@@ -416,7 +416,7 @@ int main (int argc, char * const * argv)
 	}
 	else
 	{
-		auto rpc_filepath = running_executable_filepath.parent_path () / "badem_rpc";
+		auto rpc_filepath = running_executable_filepath.parent_path () / "nano_rpc";
 		if (running_executable_filepath.has_extension ())
 		{
 			rpc_filepath.replace_extension (running_executable_filepath.extension ());

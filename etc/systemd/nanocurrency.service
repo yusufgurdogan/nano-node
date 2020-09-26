@@ -6,7 +6,7 @@ After=network.target
 Type=simple
 User=bademcurrency
 WorkingDirectory=/var/bademcurrency/Badem
-ExecStart=/usr/bin/badem_node --daemon
+ExecStart=/usr/bin/nano_node --daemon
 Restart=on-failure
 
 [Install]
