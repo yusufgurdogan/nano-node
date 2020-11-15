@@ -49,7 +49,7 @@ void nano::public_key::encode_account (std::string & destination_a) const
 		number_l >>= 5;
 		destination_a.push_back (account_encode (r));
 	}
-	destination_a.append ("_mdb"); // bdm_
+	destination_a.append ("_medab"); // badem_
 	std::reverse (destination_a.begin (), destination_a.end ());
 }
 
@@ -70,13 +70,13 @@ bool nano::public_key::decode_account (std::string const & source_a)
 	auto error (source_a.size () < 5);
 	if (!error)
 	{
-		auto bdm_prefix (source_a[0] == 'b' && source_a[1] == 'd' && source_a[2] == 'm' && (source_a[3] == '_' || source_a[3] == '-'));
-		error = (bdm_prefix && source_a.size () != 64);
+		auto bdm_prefix (source_a[0] == 'b' && source_a[1] == 'a' && source_a[2] == 'd' && source_a[3] == 'e' && source_a[4] == 'm' && (source_a[5] == '_' || source_a[5] == '-'));
+		error = (bdm_prefix && source_a.size () != 66);
 		if (!error)
 		{
 			if (bdm_prefix)
 			{
-				auto i (source_a.begin () + (bdm_prefix ? 4 : 5));
+				auto i (source_a.begin () + (bdm_prefix ? 6 : 7));
 				if (*i == '1' || *i == '3')
 				{
 					nano::uint512_t number_l;
