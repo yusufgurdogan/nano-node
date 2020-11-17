@@ -30,11 +30,11 @@ char const * beta_public_key_data = "499D3E2FC2DB9FC2D0D4C445AD073C713E5634D7B2B
 char const * live_public_key_data = "97D3FCD7FA2127B0BE06A159E98EC10AF99EF048BB1D3D8396BB6AA4E253D826"; // badem_37ymzmdznab9p4z1facsx89e44qsmur6jgrx9p3sfgucnmj79p38jkrrjmaj
 char const * test_genesis_data = R"%%%({
 	"type": "open",
-	"source": "97D3FCD7FA2127B0BE06A159E98EC10AF99EF048BB1D3D8396BB6AA4E253D826",
-	"representative": "badem_37ymzmdznab9p4z1facsx89e44qsmur6jgrx9p3sfgucnmj79p38jkrrjmaj",
-	"account": "badem_37ymzmdznab9p4z1facsx89e44qsmur6jgrx9p3sfgucnmj79p38jkrrjmaj",
-	"work": "8998a53debd2acfa",
-	"signature": "A0AE55CA153A6C2308137F7F2CCD9DC9AE1590A9D31A826CA8A52290F53D258EA933136C7D7E06E294C2886D74E707B4B29D6A6102E77B349C1FA86937CB8F09"
+	"source": "B0311EA55708D6A53C75CDBF88300259C6D018522FE3D4D0A242E431F9E8B6D0",
+	"representative": "badem_3e3j5tkog48pnny9dmfzj1r16pg8t1e76dz5tmac6iq689wyjfpiij4txtdo",
+	"account": "badem_3e3j5tkog48pnny9dmfzj1r16pg8t1e76dz5tmac6iq689wyjfpiij4txtdo",
+	"work": "9680625b39d3363d",
+	"signature": "ECDA914373A2F0CA1296475BAEE40500A7F0A7AD72A5A80C81D7FAB7F6C802B2CC7DB50F5DD0FB25B2EF11761FA7344A158DD5A700B21BD47DE5BD0F63153A02"
 	})%%%";
 
 char const * beta_genesis_data = R"%%%({
@@ -48,11 +48,11 @@ char const * beta_genesis_data = R"%%%({
 
 char const * live_genesis_data = R"%%%({
 	"type": "open",
-	"source": "40C8E1D867DA316ED2404C8A69624FFCFF884B0ADBB26B58F7A0C27C0E044A34",
-	"representative": "badem_1i8aw9e8hpjjfub61m6cf7j6zz9zj37iopxkffehha84hi91akjn1n9s51fg",
-	"account": "badem_1i8aw9e8hpjjfub61m6cf7j6zz9zj37iopxkffehha84hi91akjn1n9s51fg",
-	"work": "e6bdfde84acdea33",
-	"signature": "2EA5AD03F2925707F25E1245E821042EEAFE8DEDD5E50A913B8E65DD13945B73654E63BDC8D23AA4B315BE60FE8E75103D00A95B24C6EA916A8A1145296C1903"
+	"source": "97D3FCD7FA2127B0BE06A159E98EC10AF99EF048BB1D3D8396BB6AA4E253D826",
+	"representative": "badem_37ymzmdznab9p4z1facsx89e44qsmur6jgrx9p3sfgucnmj79p38jkrrjmaj",
+	"account": "badem_37ymzmdznab9p4z1facsx89e44qsmur6jgrx9p3sfgucnmj79p38jkrrjmaj",
+	"work": "8998a53debd2acfa",
+	"signature": "A0AE55CA153A6C2308137F7F2CCD9DC9AE1590A9D31A826CA8A52290F53D258EA933136C7D7E06E294C2886D74E707B4B29D6A6102E77B349C1FA86937CB8F09"
 	})%%%";
 }
 
